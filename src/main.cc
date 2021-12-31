@@ -63,8 +63,9 @@ main(int argc, char** argv)
 	slicesout.resize(slicesin.size());
 	std::cout << "Contents:" << std::endl;
 
-	// Idea here is to pull out the vectors(arrays), transform them, and put the transformed vectors into the
-	// recieving queue
+	// Idea here is to pull out the vectors(arrays) in groups based on the number of nodes available to share
+	// the work, have each node transform them, and put the transformed vectors into the recieving queue. The
+	// node maintaining the queues will be the master, and use 0MQ to talk to each slave node.
 	for(std::vector<std::array<double, 3>>::const_iterator it = slicesin.begin(); it != slicesin.end(); ++it)
 		PrintArray(*it);
 
