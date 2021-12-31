@@ -8,7 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 /**
- * Simple demo of distributed slicing queue system using 0MQ
+ * Simple demo of distributed 3d print slicing queue system
+ * using 0MQ.
  * Two data queues are set up (vectors of arrays) containing
  * glm vectors for transformation. Clients will be given
  * sections data off the the input queue, transform them, and
