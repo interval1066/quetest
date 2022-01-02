@@ -6,10 +6,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define DEG_TO_RAD(x) (x*0.0174532925199f)
+#define DEG_TO_RAD(x) (x * 0.0174532925199f)
 
 using namespace std;
-
+/**
+ * Simple slicer for 3d printing I found somewhere as is. Had to remove odd characters,
+ * a result of the copy and paste action I assume. Will integrate with the printer queue
+ * code and convert the C apis with proper STL ones and what not. Output to the console
+ * for testing, and the numbers look pretty good.
+ */
 struct v3
 {
 	float x, y, z;
