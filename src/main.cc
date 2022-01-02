@@ -16,6 +16,8 @@
  * put the transformed data into the output queue. This is just
  * an initial proof of concept, so everything happens here, no
  * clients, yet. And no messaging, yet.
+ *
+ * Test data, below to be replaced by vectors from the input queue.
  */
 template<typename Numeric, typename Generator = std::mt19937>
 Numeric random(Numeric from, Numeric to)
