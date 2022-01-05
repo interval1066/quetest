@@ -82,8 +82,8 @@ struct Triangle
 		for (size_t i = 0; i < 3; ++i) {
 			const v3& a = v[lines[i * 2 + 0]];
 			const v3& b = v[lines[i * 2 + 1]];
-			const float da = plane.distanceToPoint(a);
 
+			const float da = plane.distanceToPoint(a);
 			const float db = plane.distanceToPoint(b);
 
 			if (da * db < 0) {
@@ -105,13 +105,13 @@ struct Triangle
 			// Output the intersecting line segment object
 			ls.v[0] = intersectPoints[0];
 			ls.v[1] = intersectPoints[1];
+
 			return 0;
 		}
 		return -2;
 	}
 
 	v3 v[3], normal;
-
 };
 
 class TriangleMesh
@@ -242,7 +242,7 @@ stlToMeshInMemory(const char* stlFile,
 // Take an input Triangle Mesh ‘mesh’ and fill the output
 // parameter ‘slicesWithLineSegments’ with line segments for
 // each slice
-int
+void
 triMeshSlicer(const TriangleMesh* mesh,
 	std::vector<std::vector<LineSegment>>& slicesWithLineSegments,
 	const float sliceSize)
@@ -268,7 +268,6 @@ triMeshSlicer(const TriangleMesh* mesh,
 		}
 		slicesWithLineSegments.push_back(linesegs);        // push this vector to the slices vector
 	}
-	return 0;
 }
 
 int exportSingleGIVFormat3D(const std::vector<std::vector<LineSegment>> &slicesWithLineSegments,
@@ -295,16 +294,12 @@ int exportSingleGIVFormat3D(const std::vector<std::vector<LineSegment>> &slicesW
 	// Start Output
 	//char filename[256];
 
-	FILE* f = nullptr;
 	v3 p0, p1;
-
-	f = fopen("out3D.marks", "w");
-	if (!f) return 1;
 
 	const size_t nSlices = slicesWithLineSegments.size();
 	//const size_t slicePerRow = (size_t)sqrt((float)nSlices);
 
-	for (size_t i=0; i<nSlices; ++i) {
+	for (size_t i = 0; i < nSlices; ++i) {
 		const std::vector<LineSegment> &lss = slicesWithLineSegments[i];
 		for (size_t j=0; j<lss.size(); ++j) {
 
@@ -318,7 +313,6 @@ int exportSingleGIVFormat3D(const std::vector<std::vector<LineSegment>> &slicesW
 		}
 		std::cout << std::endl;
 	}
-	fclose(f);
 	return 0;
 }
 

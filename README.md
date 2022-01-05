@@ -7,4 +7,4 @@ Point here is to demonstrait a method of distrubuting complex mathematical opera
 
 In this greatly simplified demo I will simulate a queue master and a slicer client on the same host, but I anticipate being able to easily move the client nodes out to actual hosts after I get the main demo working.
 
-The main module generates random numbers to load into the input queue but now I have a working slicer so that will be removed in favor of the ouput from the slicer.
+Update: Using the OSS slicer code I found at random on the net the slicing procedure doesn't take nearly as long as I remember it kind of making the whole point moot. Material? Crapp slicer during first use???
