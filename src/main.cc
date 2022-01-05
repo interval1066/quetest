@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <slicer.h>
 
 /**
  * Simple demo of distributed 3d print slicing queue system
