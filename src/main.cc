@@ -25,8 +25,6 @@ main(int argc, char** argv)
 	std::vector<std::array<float, 3>> slicesin;
 	std::vector<std::array<float, 3>> slicesout;
 
-	// read in the stl file
-	// then process
 	/*for(auto i = 0; i < 1000000; ++i) {
 		glmvec = { random<float>(1.000000, 10000.000000),
 			random<float>(1.000000, 10000.000000),
