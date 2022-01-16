@@ -7,5 +7,5 @@ Point here is to demonstrait a method of distrubuting complex mathematical opera
 
 In this greatly simplified demo I will simulate a queue master and a slicer client on the same host, but I anticipate being able to easily move the client nodes out to actual hosts after I get the main demo working.
 
-<p><ul><li>Update: Still getting the ouput of the slicer to get turned into GCode.</li>
+<p><ul><li>Original slicer code sucked and I didn't realize it.</li><li>Update: Still getting the ouput of the slicer to get turned into GCode.</li>
 <li>Update 2: Actually have the slicer working now. Original code had a really stupid flaw that I finally uncovered today. Now I can make some constructive progress.</li></ul></p>
