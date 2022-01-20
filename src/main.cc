@@ -3,10 +3,9 @@
 #include <cstdlib>
 #include <iomanip>
 #include <array>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <slicer.h>
+#include <stl2gcode.h>
+
+using namespace std;
 
 /**
  * Simple demo of distributed 3d print slicing queue system
@@ -21,20 +20,6 @@
 int
 main(int argc, char** argv)
 {
-	std::array<float, 3> glmvec;
-	std::vector<std::array<float, 3>> slicesin;
-	std::vector<std::array<float, 3>> slicesout;
-
-	/*for(auto i = 0; i < 1000000; ++i) {
-		glmvec = { random<float>(1.000000, 10000.000000),
-			random<float>(1.000000, 10000.000000),
-			random<float>(1.000000, 10000.000000) };
-		slicesin.push_back(glmvec);
-	}*/
-
-	slicesout.resize(slicesin.size());
-	std::cout << "Contents:" << std::endl;
-
 	// Idea here is to pull out the vectors(arrays) in groups based on the number of nodes available to share
 	// the work, have each node transform them, and put the transformed vectors into the recieving queue. The
 	// node maintaining the queues will be the master, and use 0MQ to talk to each slave node.
