@@ -1,5 +1,5 @@
 # quetest
-Demo of a distributed glm transformation framework I wrote about 5 years ago
+Demo of a distributed 3d slicer framework I wrote about 5 years ago
 
 Recently interviewed for a plumb job and they denied me 'cause I didn't go into enough detail or some shit about this project I did over 5 years ago so I'm re-creating it from memory and making some improvements.
 
