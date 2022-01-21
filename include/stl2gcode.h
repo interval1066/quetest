@@ -1,5 +1,5 @@
-#ifndef STL2GCODE_STL2GCODE_H
-#define STL2GCODE_STL2GCODE_H
+#ifndef STL2GCODE_H
+#define STL2GCODE_H
 
 #include <vector>
 #include <string>
