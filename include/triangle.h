@@ -1,5 +1,5 @@
-#ifndef STL2GCODE_TRIANGLE_H
-#define STL2GCODE_TRIANGLE_H
+#ifndef TRIANGLE_H_
+#define TRIANGLE_H_
 
 #include <vector>
 #include <vertex.h>
