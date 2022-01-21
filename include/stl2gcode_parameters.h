@@ -1,5 +1,5 @@
-#ifndef STL2GCODE_STL2GCODE_PARAMETERS_H
-#define STL2GCODE_STL2GCODE_PARAMETERS_H
+#ifndef PARAMETERS_H_
+#define PARAMETERS_H_
 
 // Will be replaced by a json file or something a a little
 // less static
