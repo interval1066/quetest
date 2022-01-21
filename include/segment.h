@@ -1,5 +1,5 @@
-#ifndef STL2GCODE_SEGMENT_H
-#define STL2GCODE_SEGMENT_H
+#ifndef SEGMENT_H
+#define SEGMENT_H
 
 #include <ostream>
 #include <vertex.h>
