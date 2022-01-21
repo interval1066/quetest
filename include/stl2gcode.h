@@ -9,6 +9,7 @@
 #include <triangle.h>
 #include <segment.h>
 #include <contour.h>
+#include <filesystem>
 
 class STLDivider
 {
