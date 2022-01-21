@@ -10,6 +10,8 @@
 #include <segment.h>
 #include <contour.h>
 #include <filesystem>
+#include <jsoncpp/json/value.h>
+#include <jsoncpp/json/json.h>
 
 class STLDivider
 {
@@ -32,7 +34,7 @@ class STL2gcode
 
     std::set<int> planes;
     std::string file;
-    STL2gcode_parameters parameters;
+    STL2gcodeParams params;
 
     float x_min, x_max, y_min, y_max, z_min, z_max;
 
@@ -47,7 +49,7 @@ class STL2gcode
     void gcode(const string& path);
 
 public:
-    explicit STL2gcode(const std::string& path, const stl2gcode_parameters& parameters);
+    explicit STL2gcode(const std::string& path, const STL2gcodeParams& params);
     void convert(const std::string& path);
     void debug_file(void);
 };
