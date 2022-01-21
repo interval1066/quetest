@@ -16,8 +16,11 @@
 class STLDivider
 {
 	std::vector<pair<char*, int>> slicecontainer;
+	std::string _file;
+	size_t _size;
 
 public:
+	explicit STLDivider(std::string&);
 	std::vector<pair<char*, int>> ReadFile(const char*);
 	void SplitFile(void);
 };

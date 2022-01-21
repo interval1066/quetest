@@ -8,6 +8,12 @@
 constexpr float STL2gcode::near_point = 0.00002f;
 constexpr float STL2gcode::near_distance = 0.03f;
 
+STLDivider::STLDivider(std::string& stlfile) : _file(stlfile)
+{
+	std::ifstream in(_file.c_str(), std::ifstream::ate | std::ifstream::binary);
+	_size = in.tellg(); 
+}
+
 STL2gcode::STL2gcode(const string& path, const STL2gcodeParams& params)
 {
 	cout << path.c_str() << endl;
@@ -29,11 +35,11 @@ STL2gcode::STL2gcode(const string& path, const STL2gcodeParams& params)
 void
 STL2gcode::stl_binary()
 {
-	struct Header
+	/*struct Header
 	{
 		char info[80];
 		unsigned int number;
-	} header{};
+	};*/
 
 	struct Face
 	{
@@ -49,8 +55,8 @@ STL2gcode::stl_binary()
 	unsigned int number;
 	f.read((char*)& number, 4);
 
-	for (int i = 0; i < number; ++i) {
-		f.read((char *) &face, 50);
+	for(unsigned i = 0; i < number; ++i) {
+		f.read((char*)&face, 50);
 		triangles.push_back(face.triangle);
 	}
 	f.close();
@@ -178,13 +184,13 @@ STL2gcode::convert(const string& path)
 		shells.pop_back();
 	}
 
-	for(int i = 0; i < segments.size(); ++i)
+	for(unsigned i = 0; i < segments.size(); ++i)
 		contour_construction(segments[i], shells[i]);
 
 	segments.clear();
-	int plane_levels_count = static_cast<int>(floorf(params.top_bottom_thickness / params.layer_height));
+	unsigned plane_levels_count = static_cast<int>(floorf(params.top_bottom_thickness / params.layer_height));
 
-	for(int i = 0; i < shells.size() - 1; ++i) {
+	for(unsigned i = 0; i < shells.size() - 1; ++i) {
 		bool is_plane;
 
 		if(i < plane_levels_count || planes.count(i) == 1)
@@ -218,7 +224,7 @@ STL2gcode::slicing(const float& dz)
     segments.resize(p_size);
     list<Triangle_> current;
 
-    for (int i = 0; i < p_size; ++i) {
+    for(unsigned i = 0; i < p_size; ++i) {
 		float plane_z = z_min + dz * i;
 
 		current.remove_if([&plane_z] (const Triangle_ &t) -> bool {
@@ -247,56 +253,54 @@ STL2gcode::slicing(const float& dz)
 void
 STL2gcode::contour_construction(const vector<Segment>& _segments, vector<Contour>& contours)
 {
-    vector<Segment> segments(_segments.begin(), _segments.end());
+	vector<Segment> segments(_segments.begin(), _segments.end());
 
-    while(!segments.empty()) {
-        Vertex v1 = segments.back().v0;
-        Vertex v2 = segments.back().v1;
+	while(!segments.empty()) {
+		Vertex v1 = segments.back().v0;
+		Vertex v2 = segments.back().v1;
 
-        segments.pop_back();
-        Contour contour;
-        contour.push_back(v1);
+		segments.pop_back();
+		Contour contour;
+		contour.push_back(v1);
 
-        contour.push_back(v2);
+		contour.push_back(v2);
 
-        while (contour.back().distance(contour.front()) > near_point && !segments.empty()) {
-            auto& last = contour.back();
-            auto segment = min_element(segments.begin(), segments.end(), [&last] (const Segment& s1, const Segment& s2) -> bool {
-                return min(last.distance(s1.v0), last.distance(s1.v1)) < min(last.distance(s2.v0), last.distance(s2.v1));
-            });
+		while(contour.back().distance(contour.front()) > near_point && !segments.empty()) {
+			auto& last = contour.back();
+			auto segment = min_element(segments.begin(), segments.end(), [&last] (const Segment& s1, const Segment& s2) -> bool {
+				return min(last.distance(s1.v0), last.distance(s1.v1)) < min(last.distance(s2.v0), last.distance(s2.v1));
+			});
 
-            if (segment != segments.end() && min(last.distance(segment->v0), last.distance(segment->v1)) <= near_point) {
-                if (last.distance(segment->v0) < last.distance(segment->v1)) {
-                    contour.push_back(segment->v1);
-                } else {
-                    contour.push_back(segment->v0);
-                }
-                segments.erase(segment);
-            } else
-                break;
-        }
+			if(segment != segments.end() && min(last.distance(segment->v0), last.distance(segment->v1)) <= near_point) {
+				if(last.distance(segment->v0) < last.distance(segment->v1))
+					contour.push_back(segment->v1);
+				else
+					contour.push_back(segment->v0);
 
-        if (contour.back() != contour.front() && contour.back().distance(contour.front()) <= near_point) {
-            contour.back() = contour.front();
-        }
+				segments.erase(segment);
+			} else
+				break;
+		}
 
-        for (int i = 1; i < contour.size() - 1; ++i) {
-            if (contour[i - 1] != contour[i + 1] && Segment(contour[i - 1], contour[i + 1]).distance(contour[i]) <= near_distance) {
-                contour.erase(contour.begin() + i);
-                --i;
-            }
-        }
+		if(contour.back() != contour.front() && contour.back().distance(contour.front()) <= near_point)
+			contour.back() = contour.front();
 
-        if (contour.front() == contour.back() && contour.size() > 3) {
-            if (Segment(*(contour.begin() + 1), *(contour.end() - 2)).distance(contour.front()) <= near_distance) {
-                contour.erase(contour.begin());
-                contour.erase(contour.end() - 1);
-                contour.push_back(contour.front());
-            }
-        }
+		for(unsigned i = 1; i < contour.size() - 1; ++i) {
+			if(contour[i - 1] != contour[i + 1] && Segment(contour[i - 1], contour[i + 1]).distance(contour[i]) <= near_distance) {
+				contour.erase(contour.begin() + i);
+				--i;
+			}
+		}
 
-        contours.push_back(contour);
-    }
+		if(contour.front() == contour.back() && contour.size() > 3) {
+			if(Segment(*(contour.begin() + 1), *(contour.end() - 2)).distance(contour.front()) <= near_distance) {
+				contour.erase(contour.begin());
+				contour.erase(contour.end() - 1);
+				contour.push_back(contour.front());
+			}
+		}
+		contours.push_back(contour);
+	}
 }
 
 void
@@ -304,95 +308,96 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 {
 	cout << contours.size() << endl;
 
-    float x_min = contours.front().front().x;
-    float x_max = contours.front().front().x;
-    float y_min = contours.front().front().y;
-    float y_max = contours.front().front().y;
-    float z = contours.front().front().z;
+	float x_min = contours.front().front().x;
+	float x_max = contours.front().front().x;
+	float y_min = contours.front().front().y;
 
-    for (auto& contour: contours) {
-        for (auto& vertex: contour) {
+	float y_max = contours.front().front().y;
+	float z = contours.front().front().z;
 
-            if (vertex.x < x_min)
-                x_min = vertex.x;
-            else if (x_max < vertex.x)
-                x_max = vertex.x;
-            if (vertex.y < y_min)
-                y_min = vertex.y;
-            else if (y_max < vertex.y)
-                y_max = vertex.y;
-        }
-    }
+	for(auto& contour: contours) {
+		for(auto& vertex: contour) {
 
-    float dt = max(x_max - x_min, y_max - y_min);
-    if (is_plane) {
-        dt = params.nozzle_diameter;
-    } else if (params.filling_density != 0.0f) {
-        float filling_square = params.filling_density * (x_max - x_min) * (y_max - y_min);
-        float n = filling_square / (2 * params.nozzle_diameter * hypot(x_max - x_min, y_max - y_min));
-        dt /= n;
-    }
+			if(vertex.x < x_min)
+				x_min = vertex.x;
+			else if(x_max < vertex.x)
+				x_max = vertex.x;
+			if(vertex.y < y_min)
+				y_min = vertex.y;
+			else if(y_max < vertex.y)
+				y_max = vertex.y;
+		}
+	}
 
-    vector<Segment> infill_lines;
-    if (!is_plane || level % 2 == 0) {
-        for (float y = y_min; y < y_max; y += dt) {
+	float dt = max(x_max - x_min, y_max - y_min);
+	if(is_plane)
+		dt = params.nozzle_diameter;
+	else if (params.filling_density != 0.0f) {
+		float filling_square = params.filling_density * (x_max - x_min) * (y_max - y_min);
+		float n = filling_square / (2 * params.nozzle_diameter * hypot(x_max - x_min, y_max - y_min));
+		dt /= n;
+	}
 
-            float b = y - x_min;
-            float x = y_max - b;
-            infill_lines.emplace_back(Vertex(x_min, y, z), Vertex(x, y_max, z));
-        }
+	vector<Segment> infill_lines;
+	if(!is_plane || level % 2 == 0) {
+		for (float y = y_min; y < y_max; y += dt) {
 
-        for (float x = x_min + dt; x < x_max; x += dt) {
-            float b = y_min - x;
-            float y = x_max + b;
-            infill_lines.emplace_back(Vertex(x, y_min, z), Vertex(x_max, y, z));
-        }
-    }
+			float b = y - x_min;
+			float x = y_max - b;
+			infill_lines.emplace_back(Vertex(x_min, y, z), Vertex(x, y_max, z));
+		}
 
-    if (!is_plane || level % 2 == 1) {
-        for (float x = x_min; x < x_max; x += dt) {
-            float b = y_max + x;
-            float y = b - x_max;
-            infill_lines.emplace_back(Vertex(x, y_max, z), Vertex(x_max, y, z));
-        }
+		for (float x = x_min + dt; x < x_max; x += dt) {
+			float b = y_min - x;
+			float y = x_max + b;
+			infill_lines.emplace_back(Vertex(x, y_min, z), Vertex(x_max, y, z));
+		}
+	}
 
-        for (float y = y_min + dt; y < y_max; y += dt) {
-            float b = y + x_min;
-            float x = b - y_min;
-            infill_lines.emplace_back(Vertex(x_min, y, z), Vertex(x, y_min, z));
-        }
-    }
+	if (!is_plane || level % 2 == 1) {
+		for (float x = x_min; x < x_max; x += dt) {
+			float b = y_max + x;
+			float y = b - x_max;
+			infill_lines.emplace_back(Vertex(x, y_max, z), Vertex(x_max, y, z));
+		}
 
-    for(auto& infill_line : infill_lines) {
-        vector<Vertex> intersections;
-        for (auto& contour: contours) {
+		for(float y = y_min + dt; y < y_max; y += dt) {
+			float b = y + x_min;
+			float x = b - y_min;
+			infill_lines.emplace_back(Vertex(x_min, y, z), Vertex(x, y_min, z));
+		}
+	}
 
-            for (int i = 0; i < contour.size() - 1; ++i) {
-                Vertex intersection;
-                if (infill_line.intersect_with_segment(Segment(contour[i], contour[i + 1]), intersection))
-                    intersections.push_back(intersection);
-            }
-        }
+	for(auto& infill_line : infill_lines) {
+		vector<Vertex> intersections;
+		for(auto& contour: contours) {
 
-        sort(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
-            return v1.y < v2.y;
-        });
+			for(unsigned i = 0; i < contour.size() - 1; ++i) {
+				Vertex intersection;
+				if(infill_line.intersect_with_segment(Segment(contour[i], contour[i + 1]), intersection))
+					intersections.push_back(intersection);
+			}
+		}
 
-        intersections.erase(unique(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
-            return v1.distance(v2) <= 3 * near_point;
-        }), intersections.end());
+		sort(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
+			return v1.y < v2.y;
+		});
 
-        if (intersections.size() > 1) {
-            for (int i = 0; i < intersections.size() - 1; i += 2) {
-                Segment segment(intersections[i], intersections[i + 1]);
+		intersections.erase(unique(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
+			return v1.distance(v2) <= 3 * near_point;
+		}), intersections.end());
 
-                if (segment.length() >= 3 * params.nozzle_diameter) {
-                    segment.shorten_by(params.nozzle_diameter);
-                    fillings.push_back(segment);
-                }
-            }
-        }
-    }
+		if(intersections.size() > 1) {
+			for(unsigned i = 0; i < intersections.size() - 1; i += 2) {
+				Segment segment(intersections[i], intersections[i + 1]);
+
+				if(segment.length() >= 3 * params.nozzle_diameter) {
+					segment.shorten_by(params.nozzle_diameter);
+					fillings.push_back(segment);
+				}
+			}
+		}
+	}
 }
 
 void
@@ -423,7 +428,7 @@ STL2gcode::gcode(const string& path)
 	const float retraction = 6.5f;
 	float extruded = 0.0f;
 
-	for(int l = 0; l < shells.size(); ++l) {
+	for(unsigned l = 0; l < shells.size(); ++l) {
 		out << ";LAYER:" << l << endl;
 		if (!shells[l].empty()) {
 
@@ -436,7 +441,7 @@ STL2gcode::gcode(const string& path)
 				out << "G0 X" << contour.front().x << " Y" << contour.front().y << " F" << params.moving_speed << endl;
 				out << "G1 E" << extruded << endl;
 
-				for (int i = 1; i < contour.size(); ++i) {
+				for(unsigned i = 1; i < contour.size(); ++i) {
 					extruded += 4 * params.layer_height * params.nozzle_diameter * contour[i].distance(contour[i-1]) / (M_PI * pow(params.thread_thickness, 2));
 					out << "G1 X" << contour[i].x << " Y" << contour[i].y << " E" << extruded << " F" << params.printing_speed << endl;
 				}
