@@ -9,5 +9,5 @@ In this greatly simplified demo I will simulate a queue master and a slicer clie
 
 <p><ul><li>Original slicer code sucked and I didn't realize it.</li><li>Update: Still getting the ouput of the slicer to get turned into GCode.</li>
 <li>Update 2: Actually have the slicer working now. Original code had a really stupid flaw that I finally uncovered today. Now I can make some constructive progress.</li>
-<ul>Started slicer integration.</ul></p>
+<li>Started slicer integration.</li></ul></p>
 
