@@ -8,7 +8,7 @@
 static constexpr float stl2gcode::near_point = 0.00002f;
 static constexpr float stl2gcode::near_distance = 0.03f;
 
-stl2gcode::stl2gcode(const string &path, const stl2gcode_parameters& parameters)
+stl2gcode::stl2gcode(const string& path, const stl2gcode_parameters& parameters)
 {
 	cout << path.c_str() << endl;
 	this->file = path;

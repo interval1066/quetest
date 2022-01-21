@@ -10,7 +10,16 @@
 #include <segment.h>
 #include <contour.h>
 
-class stl2gcode
+class STLDivider
+{
+	std::vector<pair<char*, int>> slicecontainer;
+
+public:
+	std::vector<pair<char*, int>> ReadFile(const char*);
+	void SplitFile(void);
+};
+
+class STL2gcode
 {
     static const float near_point;
     static const float near_distance;
@@ -22,13 +31,13 @@ class stl2gcode
 
     std::set<int> planes;
     std::string file;
-    stl2gcode_parameters parameters;
+    STL2gcode_parameters parameters;
 
     float x_min, x_max, y_min, y_max, z_min, z_max;
 
-    void stl_binary();
-    void stl_ascii();
-    bool is_ascii();
+    void stl_binary(void);
+    void stl_ascii(void);
+    bool is_ascii(void);
 
     void slicing(const float& dz);
     void contour_construction(const std::vector<Segment>& segments, std::vector<Contour>& contours);
@@ -37,9 +46,9 @@ class stl2gcode
     void gcode(const string& path);
 
 public:
-    explicit stl2gcode(const std::string& path, const stl2gcode_parameters& parameters);
+    explicit STL2gcode(const std::string& path, const stl2gcode_parameters& parameters);
     void convert(const std::string& path);
-    void debug_file();
+    void debug_file(void);
 };
 
 #endif
