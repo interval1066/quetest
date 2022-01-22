@@ -1,10 +1,15 @@
-#ifndef STL2GCODE_H
-#define STL2GCODE_H
+#ifndef STL2GCODE_H_
+#define STL2GCODE_H_
 
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <list>
 #include <stl2gcode_parameters.h>
 #include <triangle.h>
 #include <segment.h>

@@ -26,20 +26,23 @@ Segment::length() const
 void
 Segment::shorten_by(const float &by)
 {
-    if (v0.x < v1.x) {
-        v0.x += by;
-        v1.x -= by;
-    } else {
-        v0.x -= by;
-        v1.x += by;
-    }
-    if (v0.y < v1.y) {
-        v0.y += by;
-        v1.y -= by;
-    } else {
-        v0.y -= by;
-        v1.y += by;
-    }
+	if(v0.x < v1.x) {
+		v0.x += by;
+		v1.x -= by;
+	}
+	else {
+		v0.x -= by;
+		v1.x += by;
+	}
+
+	if(v0.y < v1.y) {
+		v0.y += by;
+		v1.y -= by;
+	}
+	else {
+		v0.y -= by;
+		v1.y += by;
+	}
 }
 
 Vertex

@@ -20,6 +20,15 @@ using namespace std;
 int
 main(int argc, char** argv)
 {
+	STL2gcodeParams parameters{};
+	vector<string> models = { "Kratos.stl" };
+
+	parameters.nozzle_diameter = 0.4f;
+	parameters.thread_thickness = 2.85f;
+
+	STL2gcode mesh(models[0], parameters);
+
+	mesh.convert("model.gcode");
 	// Idea here is to pull out the vectors(arrays) in groups based on the number of nodes available to share
 	// the work, have each node transform them, and put the transformed vectors into the recieving queue. The
 	// node maintaining the queues will be the master, and use 0MQ to talk to each slave node.

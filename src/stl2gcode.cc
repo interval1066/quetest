@@ -1,8 +1,3 @@
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-#include <list>
 #include <stl2gcode.h>
 
 constexpr float STL2gcode::near_point = 0.00002f;
@@ -386,7 +381,7 @@ STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& f
 			return v1.y < v2.y;
 		});
 
-		intersections.erase(unique(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
+		intersections.erase(unique(intersections.begin(), intersections.end(), [](const Vertex& v1, const Vertex& v2) -> bool {
 			return v1.distance(v2) <= 3 * near_point;
 		}), intersections.end());
 
