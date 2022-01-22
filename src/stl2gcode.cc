@@ -18,7 +18,9 @@ STLDivider::STLDivider(std::string& stlfile) : _file(stlfile)
 
 STL2gcode::STL2gcode(const std::string& path, const STL2gcodeParams& params)
 {
+#ifdef _DEBUG
 	std::cout << path.c_str() << std::endl;
+#endif
 	this->file = path;
 	this->params = params;
 
