@@ -1,9 +1,9 @@
 #include <contour.h>
 
-ostream& operator<<(ostream& stream, const Contour& contour)
+std::ostream& operator<<(std::ostream& stream, const Contour& contour)
 {
-	for (auto& vertex : contour)
-		stream << vertex << " ";
+	for (auto& vert : contour)
+		stream << vert << " ";
 
 	return stream;
 }

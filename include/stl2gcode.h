@@ -15,13 +15,13 @@
 
 class STLDivider
 {
-	std::vector<pair<char*, int>> slicecontainer;
+	std::vector<std::pair<char*, int>> slicecontainer;
 	std::string _file;
 	size_t _size;
 
 public:
 	explicit STLDivider(std::string&);
-	std::vector<pair<char*, int>> ReadFile(const char*);
+	std::vector<std::pair<char*, int>> ReadFile(const char*);
 	void SplitFile(void);
 };
 
@@ -29,11 +29,11 @@ class STL2gcode
 {
     static const float near_point;
     static const float near_distance;
-    std::vector<Triangle> triangles;
+    std::vector<slicer::Triangle> triangles;
 
-    std::vector<vector<Segment>> segments;
-    std::vector<vector<Contour>> shells;
-    std::vector<vector<Segment>> infill;
+    std::vector<std::vector<slicer::Segment>> segments;
+    std::vector<std::vector<Contour>> shells;
+    std::vector<std::vector<slicer::Segment>> infill;
 
     std::set<int> planes;
     std::string file;
@@ -46,15 +46,15 @@ class STL2gcode
     bool is_ascii(void);
 
     void slicing(const float& dz);
-    void contour_construction(const std::vector<Segment>& segments, std::vector<Contour>& contours);
-    void filling(const std::vector<Contour>& contours, std::vector<Segment>& fillings, const int& level, const bool& is_plane);
+    void contour_construction(const std::vector<slicer::Segment>& segments, std::vector<Contour>& contours);
+    void filling(const std::vector<Contour>& contours, std::vector<slicer::Segment>& fillings, const int& level, const bool& is_plane);
 
-    void gcode(const string& path);
+    void gcode(const std::string& path);
 
 public:
     explicit STL2gcode(const std::string& path, const STL2gcodeParams& params);
     void convert(const std::string& path);
-    void debug_file(void);
+    //void debug_file(void);
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace slicer;
 
 Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3) : v1(v1), v2(v2), v3(v3) {}
 

@@ -8,21 +8,23 @@
 constexpr float STL2gcode::near_point = 0.00002f;
 constexpr float STL2gcode::near_distance = 0.03f;
 
+using namespace slicer;
+
 STLDivider::STLDivider(std::string& stlfile) : _file(stlfile)
 {
 	std::ifstream in(_file.c_str(), std::ifstream::ate | std::ifstream::binary);
-	_size = in.tellg(); 
+	_size = in.tellg();
 }
 
-STL2gcode::STL2gcode(const string& path, const STL2gcodeParams& params)
+STL2gcode::STL2gcode(const std::string& path, const STL2gcodeParams& params)
 {
-	cout << path.c_str() << endl;
+	std::cout << path.c_str() << std::endl;
 	this->file = path;
 	this->params = params;
 
-	fstream f(file);
+	std::fstream f(file);
 	if (!f.is_open())
-		throw invalid_argument("File doesn't exist.");
+		throw std::invalid_argument("File doesn't exist.");
 
 	f.close();
 
@@ -48,7 +50,7 @@ STL2gcode::stl_binary()
 		unsigned short attribute;
 	} face;
 
-	ifstream f(file, ios::binary);
+	std::ifstream f(file, std::ios::binary);
 	char temp[80];
 	f.read(temp, 80);
 
@@ -65,8 +67,8 @@ STL2gcode::stl_binary()
 void
 STL2gcode::stl_ascii()
 {
-	ifstream f(file);
-	string line;
+	std::ifstream f(file);
+	std::string line;
 
 	while (!f.eof()) {
 		f >> line;
@@ -106,35 +108,34 @@ STL2gcode::stl_ascii()
 bool
 STL2gcode::is_ascii()
 {
-    ifstream f(file, ios::binary);
+    std::ifstream f(file, std::ios::binary);
     char str[6];
     f.get(str, 6);
 
     f.close();
 
-    return string(str) == "solid";
+    return std::string(str) == "solid";
 }
 
-void
+/*void
 STL2gcode::debug_file()
 {
-	ofstream out("model.txt");
+	std::ofstream out("model.txt");
 	for (auto& vector : shells) {
 		for (auto& contour : vector)
-			out << contour << endl;
+			out << contour << "\n";
 	}
 
-	out << ":" << endl;
-
-	for (auto& vector : infill) {
-		for (auto& segment : vector)
-			out << segment << endl;
+	out << ":" << "\n";
+	for(auto& vector : infill) {
+		for(auto& segment : vector)
+			out << segment << "\n";
 	}
 	out.close();
-}
+}*/
 
 void
-STL2gcode::convert(const string& path)
+STL2gcode::convert(const std::string& path)
 {
 	x_min = triangles.front().x_min();
 	x_max = triangles.front().x_max();
@@ -144,7 +145,7 @@ STL2gcode::convert(const string& path)
 	z_min = triangles.front().z_min();
 	z_max = triangles.front().z_max();
 
-	for (auto& triangle : triangles) {
+	for(auto& triangle : triangles) {
 		if (x_min > triangle.x_min())
 			x_min = triangle.x_min();
 
@@ -211,8 +212,8 @@ STL2gcode::slicing(const float& dz)
 {
 	auto p_size = static_cast<unsigned int>(ceilf((z_max - z_min) / dz) + 1);
 
-	typedef vector<Triangle>::iterator Triangle_;
-	vector<vector<Triangle_>> levels;
+	typedef std::vector<Triangle>::iterator Triangle_;
+	std::vector<std::vector<Triangle_>> levels;
 	levels.resize(p_size);
 
 	for (auto triangle = triangles.begin(); triangle != triangles.end(); ++triangle) {
@@ -222,7 +223,7 @@ STL2gcode::slicing(const float& dz)
 	}
 
     segments.resize(p_size);
-    list<Triangle_> current;
+    std::list<Triangle_> current;
 
     for(unsigned i = 0; i < p_size; ++i) {
 		float plane_z = z_min + dz * i;
@@ -251,9 +252,9 @@ STL2gcode::slicing(const float& dz)
 }
 
 void
-STL2gcode::contour_construction(const vector<Segment>& _segments, vector<Contour>& contours)
+STL2gcode::contour_construction(const std::vector<Segment>& _segments, std::vector<Contour>& contours)
 {
-	vector<Segment> segments(_segments.begin(), _segments.end());
+	std::vector<Segment> segments(_segments.begin(), _segments.end());
 
 	while(!segments.empty()) {
 		Vertex v1 = segments.back().v0;
@@ -268,10 +269,10 @@ STL2gcode::contour_construction(const vector<Segment>& _segments, vector<Contour
 		while(contour.back().distance(contour.front()) > near_point && !segments.empty()) {
 			auto& last = contour.back();
 			auto segment = min_element(segments.begin(), segments.end(), [&last] (const Segment& s1, const Segment& s2) -> bool {
-				return min(last.distance(s1.v0), last.distance(s1.v1)) < min(last.distance(s2.v0), last.distance(s2.v1));
+				return std::min(last.distance(s1.v0), last.distance(s1.v1)) < std::min(last.distance(s2.v0), last.distance(s2.v1));
 			});
 
-			if(segment != segments.end() && min(last.distance(segment->v0), last.distance(segment->v1)) <= near_point) {
+			if(segment != segments.end() && std::min(last.distance(segment->v0), last.distance(segment->v1)) <= near_point) {
 				if(last.distance(segment->v0) < last.distance(segment->v1))
 					contour.push_back(segment->v1);
 				else
@@ -304,9 +305,9 @@ STL2gcode::contour_construction(const vector<Segment>& _segments, vector<Contour
 }
 
 void
-STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, const int& level, const bool& is_plane)
+STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& fillings, const int& level, const bool& is_plane)
 {
-	cout << contours.size() << endl;
+	//cout << contours.size() << endl;
 
 	float x_min = contours.front().front().x;
 	float x_max = contours.front().front().x;
@@ -329,7 +330,7 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 		}
 	}
 
-	float dt = max(x_max - x_min, y_max - y_min);
+	float dt = std::max(x_max - x_min, y_max - y_min);
 	if(is_plane)
 		dt = params.nozzle_diameter;
 	else if (params.filling_density != 0.0f) {
@@ -338,7 +339,7 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 		dt /= n;
 	}
 
-	vector<Segment> infill_lines;
+	std::vector<Segment> infill_lines;
 	if(!is_plane || level % 2 == 0) {
 		for (float y = y_min; y < y_max; y += dt) {
 
@@ -369,7 +370,7 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 	}
 
 	for(auto& infill_line : infill_lines) {
-		vector<Vertex> intersections;
+		std::vector<Vertex> intersections;
 		for(auto& contour: contours) {
 
 			for(unsigned i = 0; i < contour.size() - 1; ++i) {
@@ -379,7 +380,7 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 			}
 		}
 
-		sort(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
+		std::sort(intersections.begin(), intersections.end(), [] (const Vertex& v1, const Vertex& v2) -> bool {
 			return v1.y < v2.y;
 		});
 
@@ -401,69 +402,69 @@ STL2gcode::filling(const vector<Contour>& contours, vector<Segment>& fillings, c
 }
 
 void
-STL2gcode::gcode(const string& path)
+STL2gcode::gcode(const std::string& path)
 {
 	params.moving_speed = 60 * params.moving_speed;
 	params.filling_speed = 60 * params.filling_speed;
 	params.printing_speed = 60 * params.printing_speed;
 
-	ofstream out(path);
+	std::ofstream out(path);
 	out.precision(6);
 
-	out << "G21" << endl; // metric values
-	out << "G90" << endl; // absolute coordinates
-	out << "M82" << endl; // absolute extrusion mode
+	out << "G21" << "\n"; // metric values
+	out << "G90" << "\n"; // absolute coordinates
+	out << "M82" << "\n"; // absolute extrusion mode
 
-	out << "G28 X0 Y0 Z0" << endl; // initial position
-	out << "G0 Z100" << endl; // lowering table before heating
-	out << "M140 S" << params.table_temperature << endl; // turning on the table heating
+	out << "G28 X0 Y0 Z0" << "\n"; // initial position
+	out << "G0 Z100" << "\n"; // lowering table before heating
+	out << "M140 S" << params.table_temperature << "\n"; // turning on the table heating
 
-	out << "M190" << endl; // waiting for table temperature
-	out << "M104 S" << params.nozzle_temperature << endl; // turning on the extruder heating
-	out << "M109" << endl; // waiting for extruder temperature
+	out << "M190" << "\n"; // waiting for table temperature
+	out << "M104 S" << params.nozzle_temperature << "\n"; // turning on the extruder heating
+	out << "M109" << "\n"; // waiting for extruder temperature
 
-	out << "G0 Z0" << endl; // initial position
-	out << "G92 E0" << endl; // clears the amount of extruded plastic
+	out << "G0 Z0" << "\n"; // initial position
+	out << "G92 E0" << "\n"; // clears the amount of extruded plastic
 
 	const float retraction = 6.5f;
 	float extruded = 0.0f;
 
 	for(unsigned l = 0; l < shells.size(); ++l) {
-		out << ";LAYER:" << l << endl;
+		out << ";LAYER:" << l << "\n";
 		if (!shells[l].empty()) {
 
-			out << "G1 E" << extruded - retraction << endl;
-			out << "G0 Z" << shells[l].front().front().z << " F" << params.moving_speed << endl;
-			out << "G1 E" << extruded << endl;
+			out << "G1 E" << extruded - retraction << "\n";
+			out << "G0 Z" << shells[l].front().front().z << " F" << params.moving_speed << "\n";
+			out << "G1 E" << extruded << "\n";
 
 			for(auto& contour : shells[l]) {
-				out << "G1 E" << extruded - retraction << endl;
-				out << "G0 X" << contour.front().x << " Y" << contour.front().y << " F" << params.moving_speed << endl;
-				out << "G1 E" << extruded << endl;
+				out << "G1 E" << extruded - retraction << "\n";
+				out << "G0 X" << contour.front().x << " Y" << contour.front().y << " F" << params.moving_speed << "\n";
+				out << "G1 E" << extruded << "\n";
 
 				for(unsigned i = 1; i < contour.size(); ++i) {
 					extruded += 4 * params.layer_height * params.nozzle_diameter * contour[i].distance(contour[i-1]) / (M_PI * pow(params.thread_thickness, 2));
-					out << "G1 X" << contour[i].x << " Y" << contour[i].y << " E" << extruded << " F" << params.printing_speed << endl;
+					out << "G1 X" << contour[i].x << " Y" << contour[i].y << " E" << extruded << " F" << params.printing_speed << "\n";
 				}
 			}
-			out << ";INFILL" << endl;
+			out << ";INFILL" << "\n";
 
 			for (auto& segment : infill[l]) {
-				out << "G1 E" << extruded - retraction << endl;
-				out << "G0 X" << segment.v0.x << " Y" << segment.v0.y << " F" << params.moving_speed << endl;
+				out << "G1 E" << extruded - retraction << "\n";
+				out << "G0 X" << segment.v0.x << " Y" << segment.v0.y << " F" << params.moving_speed << "\n";
 
-				out << "G1 E" << extruded << endl;
+				out << "G1 E" << extruded << "\n";
 				extruded += 4 * params.layer_height * params.nozzle_diameter * segment.v1.distance(segment.v0) / (M_PI * pow(params.thread_thickness, 2));
-				out << "G1 X" << segment.v1.x << " Y" << segment.v1.y << " E" << extruded << " F" << params.filling_speed << endl;
+				out << "G1 X" << segment.v1.x << " Y" << segment.v1.y << " E" << extruded << " F" << params.filling_speed << "\n";
 			}
 		}
 	}
 
-	out << "M104 S0" << endl; // turning off the extruder heating
-	out << "M140 S0" << endl; // turning off the table heating
-	out << "G0 X0 Y0 Z" << params.printer_height << endl; // lowering table
+	out << "M104 S0" << "\n"; // turning off the extruder heating
+	out << "M140 S0" << "\n"; // turning off the table heating
+	out << "G0 X0 Y0 Z" << params.printer_height << "\n"; // lowering table
 
-	out << "M18" << endl; // engine power off
+	out << "M18" << "\n"; // engine power off
 	out.close();
 }
 

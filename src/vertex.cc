@@ -30,7 +30,7 @@ Vertex& Vertex::operator+=(const Vertex &v)
 	return *this;
 }
 
-bool Vertex::operator==(const Vertex& v) const 
+bool Vertex::operator==(const Vertex& v) const
 {
 	return ((this->x == v.x) && (this->y == v.y) && (this->z == v.z));
 }

@@ -5,6 +5,7 @@
 #include <segment.h>
 
 using namespace std;
+using namespace slicer;
 
 Segment::Segment(Vertex v0, Vertex v1) : v0(v0), v1(v1) {}
 
@@ -97,7 +98,7 @@ Segment::intersect_with_segment(const Segment& s2, Vertex &intersection) const
 		intersection.x = Dx / D;
 		intersection.y = Dy / D;
 		intersection.z = s1.v0.z;
-        
+
 		return intersection.between_with_e(s1.v0, s1.v1) && intersection.between_with_e(s2.v0, s2.v1);
 	}
 }

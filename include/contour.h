@@ -5,9 +5,7 @@
 #include <ostream>
 #include <vertex.h>
 
-using namespace std;
-
-typedef vector<Vertex> Contour;
-ostream& operator<<(ostream& stream, const Contour& contour);
+typedef std::vector<Vertex> Contour;
+std::ostream& operator<<(std::ostream& stream, const Contour& contour);
 
 #endif
