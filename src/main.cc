@@ -1,11 +1,10 @@
-#include <random>
 #include <iostream>
 #include <cstdlib>
-#include <iomanip>
-#include <array>
+#include <filesystem>
 #include <stl2gcode.h>
 
 using namespace std;
+using std::filesystem::exists;
 
 /**
  * Simple demo of distributed 3d print slicing queue system
@@ -20,15 +19,28 @@ using namespace std;
 int
 main(int argc, char** argv)
 {
+	bool fExist = false;
+
+	if(argc != 3) {
+		cout << "Usage: <inputstl> <outputstl>" << endl;
+		return EXIT_FAILURE;
+	}
+
+	if(exists(argv[1])) fExist = true;
+	if(!fExist) {
+		cout << "Can't find model file" << endl;
+		return EXIT_FAILURE;
+	}
+
 	STL2gcodeParams parameters{};
-	vector<string> models = { "Kratos.stl" };
+	vector<string> models = { argv[1] };
 
 	parameters.nozzle_diameter = 0.4f;
 	parameters.thread_thickness = 2.85f;
 
 	STL2gcode mesh(models[0], parameters);
 
-	mesh.convert("model.gcode");
+	mesh.convert(argv[2]);
 	// Idea here is to pull out the vectors(arrays) in groups based on the number of nodes available to share
 	// the work, have each node transform them, and put the transformed vectors into the recieving queue. The
 	// node maintaining the queues will be the master, and use 0MQ to talk to each slave node.
