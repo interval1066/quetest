@@ -5,7 +5,7 @@
 #include <ostream>
 #include <vertex.h>
 
-typedef std::vector<Vertex> Contour;
+typedef std::vector<slicer::Vertex> Contour;
 std::ostream& operator<<(std::ostream& stream, const Contour& contour);
 
 #endif

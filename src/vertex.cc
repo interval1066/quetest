@@ -1,6 +1,7 @@
 #include <vertex.h>
 
 using namespace std;
+using namespace slicer;
 
 Vertex::Vertex(float x, float y, float z) : x(x), y(y), z(z) {}
 

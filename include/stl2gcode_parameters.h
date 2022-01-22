@@ -12,14 +12,15 @@ struct STL2gcodeParams
 	float top_bottom_thickness = 0.4f;
 	float filling_density = 0.15;
 	int nozzle_temperature = 205;
-	int table_temperature = 55;
 
+	int table_temperature = 55;
 	int printing_speed = 35;
 	int filling_speed = 40;
-	int moving_speed = 90;
 
+	int moving_speed = 90;
 	int printer_width = 215;
 	int printer_depth = 215;
+
 	int printer_height = 300;
 };
 
