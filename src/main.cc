@@ -17,18 +17,15 @@ using std::filesystem::exists;
  * clients, yet. And no messaging, yet.
  */
 int
-main(int argc, char** argv)
+main(int argc, const char** argv)
 {
-	bool fExist = false;
-
 	if(argc != 3) {
 		cout << "Usage: <inputstl> <outputstl>" << endl;
 		return EXIT_FAILURE;
 	}
 
-	if(exists(argv[1])) fExist = true;
-	if(!fExist) {
-		cout << "Can't find model file" << endl;
+	if(!exists(argv[1])) {
+		cout << "Can't find input file" << endl;
 		return EXIT_FAILURE;
 	}
 
