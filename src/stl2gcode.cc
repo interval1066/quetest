@@ -17,7 +17,7 @@ STL2gcode::STL2gcode(const std::string& path, const STL2gcodeParams& params)
 	std::cout << path.c_str() << std::endl;
 #endif
 	this->file = path;
-	this->params = params;
+	this->_params = params;
 
 	std::fstream f(file);
 	if (!f.is_open())
@@ -29,17 +29,13 @@ STL2gcode::STL2gcode(const std::string& path, const STL2gcodeParams& params)
 		stl_ascii();
 	else
 		stl_binary();
+
+	processSTL(path);
 }
 
 void
 STL2gcode::stl_binary()
 {
-	/*struct Header
-	{
-		char info[80];
-		unsigned int number;
-	};*/
-
 	struct Face
 	{
 		Vertex normal;
@@ -114,23 +110,6 @@ STL2gcode::is_ascii()
     return std::string(str) == "solid";
 }
 
-/*void
-STL2gcode::debug_file()
-{
-	std::ofstream out("model.txt");
-	for (auto& vector : shells) {
-		for (auto& contour : vector)
-			out << contour << "\n";
-	}
-
-	out << ":" << "\n";
-	for(auto& vector : infill) {
-		for(auto& segment : vector)
-			out << segment << "\n";
-	}
-	out.close();
-}*/
-
 void
 STL2gcode::convert(const std::string& path)
 {
@@ -163,8 +142,8 @@ STL2gcode::convert(const std::string& path)
 	}
 
 	Vertex shift;
-	shift.x = params.printer_width / 2.0f - x_min - (x_max - x_min) / 2.0f;
-	shift.y = params.printer_depth / 2.0f - y_min - (y_max - y_min) / 2.0f;
+	shift.x = _params.printer_width / 2.0f - x_min - (x_max - x_min) / 2.0f;
+	shift.y = _params.printer_depth / 2.0f - y_min - (y_max - y_min) / 2.0f;
 	shift.z = -z_min;
 
 	for (auto& triangle: triangles)
@@ -174,7 +153,7 @@ STL2gcode::convert(const std::string& path)
 	y_min += shift.y;   y_max += shift.y;
 	z_min += shift.z;   z_max += shift.z;
 
-	slicing(params.layer_height);
+	slicing(_params.layer_height);
 	triangles.clear();
 
 	while (segments[segments.size() - 1].empty()) {
@@ -186,7 +165,7 @@ STL2gcode::convert(const std::string& path)
 		contour_construction(segments[i], shells[i]);
 
 	segments.clear();
-	unsigned plane_levels_count = static_cast<int>(floorf(params.top_bottom_thickness / params.layer_height));
+	unsigned plane_levels_count = static_cast<int>(floorf(_params.top_bottom_thickness / _params.layer_height));
 
 	for(unsigned i = 0; i < shells.size() - 1; ++i) {
 		bool is_plane;
@@ -329,10 +308,10 @@ STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& f
 
 	float dt = std::max(x_max - x_min, y_max - y_min);
 	if(is_plane)
-		dt = params.nozzle_diameter;
-	else if (params.filling_density != 0.0f) {
-		float filling_square = params.filling_density * (x_max - x_min) * (y_max - y_min);
-		float n = filling_square / (2 * params.nozzle_diameter * hypot(x_max - x_min, y_max - y_min));
+		dt = _params.nozzle_diameter;
+	else if (_params.filling_density != 0.0f) {
+		float filling_square =_params.filling_density * (x_max - x_min) * (y_max - y_min);
+		float n = filling_square / (2 * _params.nozzle_diameter * hypot(x_max - x_min, y_max - y_min));
 		dt /= n;
 	}
 
@@ -389,8 +368,8 @@ STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& f
 			for(unsigned i = 0; i < intersections.size() - 1; i += 2) {
 				Segment segment(intersections[i], intersections[i + 1]);
 
-				if(segment.length() >= 3 * params.nozzle_diameter) {
-					segment.shorten_by(params.nozzle_diameter);
+				if(segment.length() >= 3 * _params.nozzle_diameter) {
+					segment.shorten_by(_params.nozzle_diameter);
 					fillings.push_back(segment);
 				}
 			}
@@ -401,9 +380,9 @@ STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& f
 void
 STL2gcode::gcode(const std::string& path)
 {
-	params.moving_speed = 60 * params.moving_speed;
-	params.filling_speed = 60 * params.filling_speed;
-	params.printing_speed = 60 * params.printing_speed;
+	_params.moving_speed = 60 * _params.moving_speed;
+	_params.filling_speed = 60 * _params.filling_speed;
+	_params.printing_speed = 60 * _params.printing_speed;
 
 	std::ofstream out(path);
 	out.precision(6);
@@ -414,10 +393,10 @@ STL2gcode::gcode(const std::string& path)
 
 	out << "G28 X0 Y0 Z0" << "\n"; // initial position
 	out << "G0 Z100" << "\n"; // lowering table before heating
-	out << "M140 S" << params.table_temperature << "\n"; // turning on the table heating
+	out << "M140 S" << _params.table_temperature << "\n"; // turning on the table heating
 
 	out << "M190" << "\n"; // waiting for table temperature
-	out << "M104 S" << params.nozzle_temperature << "\n"; // turning on the extruder heating
+	out << "M104 S" << _params.nozzle_temperature << "\n"; // turning on the extruder heating
 	out << "M109" << "\n"; // waiting for extruder temperature
 
 	out << "G0 Z0" << "\n"; // initial position
@@ -431,37 +410,43 @@ STL2gcode::gcode(const std::string& path)
 		if (!shells[l].empty()) {
 
 			out << "G1 E" << extruded - retraction << "\n";
-			out << "G0 Z" << shells[l].front().front().z << " F" << params.moving_speed << "\n";
+			out << "G0 Z" << shells[l].front().front().z << " F" << _params.moving_speed << "\n";
 			out << "G1 E" << extruded << "\n";
 
 			for(auto& contour : shells[l]) {
 				out << "G1 E" << extruded - retraction << "\n";
-				out << "G0 X" << contour.front().x << " Y" << contour.front().y << " F" << params.moving_speed << "\n";
+				out << "G0 X" << contour.front().x << " Y" << contour.front().y << " F" << _params.moving_speed << "\n";
 				out << "G1 E" << extruded << "\n";
 
 				for(unsigned i = 1; i < contour.size(); ++i) {
-					extruded += 4 * params.layer_height * params.nozzle_diameter * contour[i].distance(contour[i-1]) / (M_PI * pow(params.thread_thickness, 2));
-					out << "G1 X" << contour[i].x << " Y" << contour[i].y << " E" << extruded << " F" << params.printing_speed << "\n";
+					extruded += 4 * _params.layer_height * _params.nozzle_diameter * contour[i].distance(contour[i-1]) / (M_PI * pow(_params.thread_thickness, 2));
+					out << "G1 X" << contour[i].x << " Y" << contour[i].y << " E" << extruded << " F" << _params.printing_speed << "\n";
 				}
 			}
 			out << ";INFILL" << "\n";
 
 			for (auto& segment : infill[l]) {
 				out << "G1 E" << extruded - retraction << "\n";
-				out << "G0 X" << segment.v0.x << " Y" << segment.v0.y << " F" << params.moving_speed << "\n";
+				out << "G0 X" << segment.v0.x << " Y" << segment.v0.y << " F" << _params.moving_speed << "\n";
 
 				out << "G1 E" << extruded << "\n";
-				extruded += 4 * params.layer_height * params.nozzle_diameter * segment.v1.distance(segment.v0) / (M_PI * pow(params.thread_thickness, 2));
-				out << "G1 X" << segment.v1.x << " Y" << segment.v1.y << " E" << extruded << " F" << params.filling_speed << "\n";
+				extruded += 4 * _params.layer_height * _params.nozzle_diameter * segment.v1.distance(segment.v0) / (M_PI * pow(_params.thread_thickness, 2));
+				out << "G1 X" << segment.v1.x << " Y" << segment.v1.y << " E" << extruded << " F" << _params.filling_speed << "\n";
 			}
 		}
 	}
 
 	out << "M104 S0" << "\n"; // turning off the extruder heating
 	out << "M140 S0" << "\n"; // turning off the table heating
-	out << "G0 X0 Y0 Z" << params.printer_height << "\n"; // lowering table
+	out << "G0 X0 Y0 Z" << _params.printer_height << "\n"; // lowering table
 
 	out << "M18" << "\n"; // engine power off
 	out.close();
 }
 
+void
+STL2gcode::processSTL(const std::string& path)
+{
+
+
+}
