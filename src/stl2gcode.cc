@@ -1,8 +1,5 @@
 #include <stl2gcode.h>
 
-constexpr float STL2gcode::near_point = 0.00002f;
-constexpr float STL2gcode::near_distance = 0.03f;
-
 using namespace slicer;
 
 STLDivider::STLDivider(std::string& stlfile) : _file(stlfile)
@@ -283,7 +280,9 @@ STL2gcode::contour_construction(const std::vector<Segment>& _segments, std::vect
 void
 STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& fillings, const int& level, const bool& is_plane)
 {
-	//cout << contours.size() << endl;
+#ifdef _DEBUG
+	std::cout << contours.size() << std::endl;
+#endif
 
 	float x_min = contours.front().front().x;
 	float x_max = contours.front().front().x;
@@ -299,6 +298,7 @@ STL2gcode::filling(const std::vector<Contour>& contours, std::vector<Segment>& f
 				x_min = vertex.x;
 			else if(x_max < vertex.x)
 				x_max = vertex.x;
+
 			if(vertex.y < y_min)
 				y_min = vertex.y;
 			else if(y_max < vertex.y)

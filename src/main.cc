@@ -29,7 +29,7 @@ main(int argc, const char** argv)
 		return EXIT_FAILURE;
 	}
 
-	STL2gcodeParams parameters{};
+	/*STL2gcodeParams parameters{};
 	vector<string> models = { argv[1] };
 
 	parameters.nozzle_diameter = 0.4f;
@@ -37,7 +37,7 @@ main(int argc, const char** argv)
 
 	STL2gcode mesh(models[0], parameters);
 
-	mesh.convert(argv[2]);
+	mesh.convert(argv[2]);*/
 	// Idea here is to pull out the vectors(arrays) in groups based on the number of nodes available to share
 	// the work, have each node transform them, and put the transformed vectors into the recieving queue. The
 	// node maintaining the queues will be the master, and use 0MQ to talk to each slave node.

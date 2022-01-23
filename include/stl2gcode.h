@@ -10,6 +10,7 @@
 #include <fstream>
 #include <cmath>
 #include <list>
+#include <stdexcept>
 #include <triangle.h>
 #include <segment.h>
 #include <contour.h>
@@ -52,6 +53,26 @@ public:
 	void SplitFile(void);
 };
 
+class ParamsMgr
+{
+	std::string _filepath;
+	Json::Reader _reader;
+	Json::Value _root;
+	Json::StyledStreamWriter _writer;
+
+public:
+	explicit ParamsMgr(const std::string& path) : _filepath(path)
+	{
+		Json::Value _root;
+		if(!_reader.parse(_filepath, _root)) {
+			throw std::runtime_error(_reader.getFormattedErrorMessages());
+			return;
+		}
+	}
+
+	void WriteParams();
+};
+
 class STL2gcode
 {
 	static const float near_point;
@@ -83,5 +104,8 @@ public:
     explicit STL2gcode(const std::string&, const STL2gcodeParams&);
     void convert(const std::string&);
 };
+
+constexpr float STL2gcode::near_point = 0.00002f;
+constexpr float STL2gcode::near_distance = 0.03f;
 
 #endif
