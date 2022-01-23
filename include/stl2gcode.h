@@ -15,8 +15,7 @@
 #include <segment.h>
 #include <contour.h>
 #include <filesystem>
-#include <jsoncpp/json/value.h>
-#include <jsoncpp/json/json.h>
+#include <paramsmgr.h>
 
 struct STL2gcodeParams
 {
@@ -51,33 +50,6 @@ public:
 	explicit STLDivider(std::string&);
 	std::vector<std::pair<char*, int>> ReadFile(const char*);
 	void SplitFile(void);
-};
-
-class ParamsMgr
-{
-	std::string _filepath;
-	Json::Reader _reader;
-	Json::Value _root;
-	Json::StyledStreamWriter _writer;
-
-public:
-	explicit ParamsMgr(const std::string& path) : _filepath(path)
-	{
-		Json::Value _root;
-		if(!_reader.parse(_filepath, _root)) {
-			throw std::runtime_error(_reader.getFormattedErrorMessages());
-			return;
-		}
-	}
-
-	void WriteParams();
-
-	// So we can have arbitraty return types w/one method
-	template<class T>
-	decltype(g(T())) GetParam()
-	{
-		return g(T());
-	}
 };
 
 class STL2gcode
