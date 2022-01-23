@@ -71,6 +71,13 @@ public:
 	}
 
 	void WriteParams();
+
+	// So we can have arbitraty return types w/one method
+	template<class T>
+	decltype(g(T())) GetParam()
+	{
+		return g(T());
+	}
 };
 
 class STL2gcode
